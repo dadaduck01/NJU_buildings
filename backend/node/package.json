@@ -1,0 +1,13 @@
+{
+  "name": "text-to-speech",
+  "version": "1.0.0",
+  "description": "Text to Speech using DashScope API",
+  "main": "tts.js",
+  "scripts": {
+    "start": "node tts.js"
+  },
+  "dependencies": {
+    "uuid": "^9.0.1",
+    "ws": "^8.18.2"
+  }
+}
