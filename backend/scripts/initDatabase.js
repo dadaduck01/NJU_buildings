@@ -33,29 +33,19 @@ db.serialize(() => {
   // 插入示例数据
   const sampleBuildings = [
     {
-      name: '图书馆',
-      image_url: 'https://example.com/library.jpg',
-      address: '校园中心区域'
+      name: '北大楼',
+      image_url: 'https://obsidian1122.oss-cn-nanjing.aliyuncs.com/picture/beidalou.webp',
+      address: '南京大学鼓楼校区北园'
     },
     {
-      name: '行政楼',
-      image_url: 'https://example.com/admin.jpg',
-      address: '校园北区'
+      name: '拉贝故居',
+      image_url: 'https://obsidian1122.oss-cn-nanjing.aliyuncs.com/picture/labei.webp',
+      address: '南京大学鼓楼校区南园东南角'
     },
     {
-      name: '学生活动中心',
-      image_url: 'https://example.com/activity.jpg',
-      address: '校园南区'
-    },
-    {
-      name: '实验楼',
-      image_url: 'https://example.com/lab.jpg',
-      address: '校园东区'
-    },
-    {
-      name: '体育馆',
-      image_url: 'https://example.com/gym.jpg',
-      address: '校园西区'
+      name: '赛珍珠故居',
+      image_url: 'https://obsidian1122.oss-cn-nanjing.aliyuncs.com/picture/saizhenzhu.webp',
+      address: '南京大学鼓楼校区北园西墙角'
     }
   ];
 
