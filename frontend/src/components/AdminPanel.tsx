@@ -307,7 +307,7 @@ const AdminPanel: React.FC<Props> = ({ onBuildingsUpdate }) => {
 
   const fetchBuildings = async () => {
     try {
-      const response = await fetch('http://localhost:5000/api/buildings');
+      const response = await fetch('/api/buildings');
       const data = await response.json();
       if (data.success) {
         setBuildings(data.data);
@@ -341,7 +341,7 @@ const AdminPanel: React.FC<Props> = ({ onBuildingsUpdate }) => {
         submitFormData.append('image', formData.image);
       }
 
-      const response = await fetch('http://localhost:5000/api/buildings', {
+      const response = await fetch('/api/buildings', {
         method: 'POST',
         body: submitFormData,
       });
@@ -377,7 +377,7 @@ const AdminPanel: React.FC<Props> = ({ onBuildingsUpdate }) => {
     }
 
     try {
-      const response = await fetch(`http://localhost:5000/api/buildings/${id}`, {
+      const response = await fetch(`/api/buildings/${id}`, {
         method: 'DELETE',
       });
 
@@ -462,7 +462,7 @@ const AdminPanel: React.FC<Props> = ({ onBuildingsUpdate }) => {
               <CardInfo>📍 {building.address}</CardInfo>
               {building.image_url && (
                 <CardImage
-                  src={`http://localhost:5000${building.image_url}`}
+                  src={building.image_url}
                   alt={building.name}
                   onError={(e) => {
                     e.currentTarget.style.display = 'none';

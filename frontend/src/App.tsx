@@ -128,7 +128,7 @@ const App: React.FC = () => {
 
   const fetchBuildings = async () => {
     try {
-      const response = await fetch('http://localhost:5000/api/buildings');
+      const response = await fetch('/api/buildings');
       const data = await response.json();
       if (data.success) {
         setBuildings(data.data);

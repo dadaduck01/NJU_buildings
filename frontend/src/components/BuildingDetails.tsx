@@ -300,7 +300,7 @@ const BuildingDetails: React.FC<Props> = ({ building }) => {
     setDescription('');
     
     try {
-      const response = await fetch('http://localhost:5000/api/generate-description', {
+      const response = await fetch('/api/generate-description', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -337,7 +337,7 @@ const BuildingDetails: React.FC<Props> = ({ building }) => {
     setError('');
     
     try {
-      const response = await fetch('http://localhost:5000/api/text-to-speech', {
+      const response = await fetch('/api/text-to-speech', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -372,7 +372,7 @@ const BuildingDetails: React.FC<Props> = ({ building }) => {
     <DetailsContainer>
       {building.image_url ? (
         <BuildingImage
-          src={`http://localhost:5000${building.image_url}`}
+          src={building.image_url}
           alt={building.name}
           onError={handleImageError}
         />
@@ -431,7 +431,7 @@ const BuildingDetails: React.FC<Props> = ({ building }) => {
           <AudioSection>
             <DescriptionTitle>🎵 语音播放</DescriptionTitle>
             <AudioPlayer ref={audioRef} controls>
-              <source src={`http://localhost:5000${audioUrl}`} type="audio/mpeg" />
+              <source src={audioUrl} type="audio/mpeg" />
               您的浏览器不支持音频播放。
             </AudioPlayer>
           </AudioSection>
