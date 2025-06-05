@@ -241,32 +241,45 @@ const BuildingDetails: React.FC<Props> = ({ building }) => {
   const [error, setError] = useState<string>('');
   const [autoPlayNotification, setAutoPlayNotification] = useState<string>('');
   const audioRef = useRef<HTMLAudioElement>(null);
+  const currentBuildingRef = useRef<string>(''); // 添加引用来跟踪当前建筑
 
   // 自动生成建筑介绍
   useEffect(() => {
-    generateDescription();
-    // 清理之前的状态
-    setAudioUrl('');
-    setError('');
-    setAutoPlayNotification('');
+    // 只有当建筑名称真正改变时才重新生成
+    if (building.name !== currentBuildingRef.current) {
+      currentBuildingRef.current = building.name;
+      generateDescription();
+      // 清理之前的状态
+      setAudioUrl('');
+      setError('');
+      setAutoPlayNotification('');
+    }
   }, [building.name]);
 
   // 当描述生成完成后，自动转换为语音
   useEffect(() => {
-    if (description && !loadingDescription && !audioUrl) {
+    // 确保描述是针对当前建筑的，并且还没有对应的音频
+    if (description && 
+        !loadingDescription && 
+        !audioUrl && 
+        !loadingAudio && 
+        building.name === currentBuildingRef.current) {
       setAutoPlayNotification('🔄 描述已生成，正在自动转换为语音...');
       generateAudio();
     }
-  }, [description, loadingDescription, audioUrl]);
+  }, [description, loadingDescription]); // 移除audioUrl依赖，避免循环触发
 
   // 当语音生成完成后，自动播放
   useEffect(() => {
-    if (audioUrl && audioRef.current && !loadingAudio) {
+    if (audioUrl && 
+        audioRef.current && 
+        !loadingAudio && 
+        building.name === currentBuildingRef.current) {
       setAutoPlayNotification('🎵 语音已生成，正在自动播放...');
       
       // 延迟一点播放以确保音频加载完成
       setTimeout(() => {
-        if (audioRef.current) {
+        if (audioRef.current && building.name === currentBuildingRef.current) {
           audioRef.current.play().then(() => {
             setAutoPlayNotification('');
           }).catch((error) => {
@@ -276,9 +289,12 @@ const BuildingDetails: React.FC<Props> = ({ building }) => {
         }
       }, 500);
     }
-  }, [audioUrl, loadingAudio]);
+  }, [audioUrl, loadingAudio, building.name]);
 
   const generateDescription = async () => {
+    // 防止重复调用
+    if (loadingDescription) return;
+    
     setLoadingDescription(true);
     setError('');
     setDescription('');
@@ -294,21 +310,26 @@ const BuildingDetails: React.FC<Props> = ({ building }) => {
       
       const data = await response.json();
       
-      if (data.success) {
+      // 确保响应的建筑名称与当前选择的建筑一致（防止异步问题）
+      if (data.success && building.name === currentBuildingRef.current) {
         setDescription(data.description);
-      } else {
+      } else if (data.error) {
         setError(data.error || '生成建筑介绍失败');
       }
     } catch (err) {
-      setError('网络错误，请稍后重试');
+      if (building.name === currentBuildingRef.current) {
+        setError('网络错误，请稍后重试');
+      }
     } finally {
       setLoadingDescription(false);
     }
   };
 
   const generateAudio = async () => {
-    if (!description) {
-      setError('请等待建筑介绍生成完成');
+    if (!description || loadingAudio) {
+      if (!description) {
+        setError('请等待建筑介绍生成完成');
+      }
       return;
     }
 
@@ -326,15 +347,18 @@ const BuildingDetails: React.FC<Props> = ({ building }) => {
       
       const data = await response.json();
       
-      if (data.success) {
+      // 确保当前建筑没有改变
+      if (data.success && building.name === currentBuildingRef.current) {
         setAudioUrl(data.audioUrl);
-      } else {
+      } else if (data.error && building.name === currentBuildingRef.current) {
         setError('生成语音失败');
         setAutoPlayNotification('');
       }
     } catch (err) {
-      setError('网络错误，请稍后重试');
-      setAutoPlayNotification('');
+      if (building.name === currentBuildingRef.current) {
+        setError('网络错误，请稍后重试');
+        setAutoPlayNotification('');
+      }
     } finally {
       setLoadingAudio(false);
     }

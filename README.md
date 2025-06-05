@@ -8,7 +8,7 @@
 - 🎨 **现代化UI**：基于React + TypeScript + Styled Components的响应式界面
 - ⚙️ **管理后台**：允许管理员添加、删除建筑信息和上传图片
 - 🤖 **AI介绍生成**：集成DashScope API，自动生成建筑介绍
-- 🔊 **文字转语音**：集成DashScope TTS，将介绍转换为语音
+- 🔊 **文字转语音**：NestJS 集成DashScope CosyVoice TTS服务，将介绍转换为语音
 - 📱 **响应式设计**：适配手机、平板和桌面设备
 - 📷 **图片上传**：支持建筑图片上传和管理
 
@@ -16,7 +16,7 @@
 
 ### 1. 环境准备
 
-确保您的系统已安装：
+确保已安装：
 - Node.js (版本 14+)
 
 ### 2. 配置环境变量
@@ -35,9 +35,6 @@ PORT=5000
 ### 3. 安装依赖
 
 ```bash
-# 安装根目录依赖
-npm install
-
 # 安装所有项目依赖（推荐）
 npm run install-all
 ```
@@ -52,20 +49,26 @@ npm run init-db
 ### 5. 启动开发服务器
 
 ```bash
-# 同时启动前后端服务器
-npm run dev
+# 使用启动脚本
+./start.sh
 
-# 或者分别启动
-npm run server  # 后端服务器 (端口 5000)
-npm run client  # 前端服务器 (端口 3000)
+# 或者手动启动
+npm run dev
 ```
+
+启动后访问：
+- 前端：http://localhost:3000
+- 后端：http://localhost:5000
 
 ## 📁 项目结构
 
 ```
 building-info-platform/
 ├── backend/                 # 后端服务器
-│   ├── node/               # Node.js TTS模块
+│   ├── src/                # NestJS源代码
+│   │   ├── tts/           # 文字转语音模块
+│   │   ├── buildings/     # 建筑信息模块
+│   │   └── app.module.ts  # 主模块
 │   ├── routes/             
 │   │   └── buildings.js    # 建筑信息API路由
 │   ├── scripts/            
@@ -89,16 +92,19 @@ building-info-platform/
 
 ### 建筑信息接口
 
-- `GET /api/buildings` - 获取所有建筑信息
-- `GET /api/buildings/:id` - 获取单个建筑信息
-- `GET /api/buildings/search/:name` - 根据名称搜索建筑
-- `POST /api/buildings` - 添加新建筑（支持图片上传）
-- `DELETE /api/buildings/:id` - 删除建筑信息
+| 方法 | 路径 | 说明 | 参数 |
+|------|------|------|------|
+| GET | `/api/buildings` | 获取所有建筑 | 无 |
+| GET | `/api/buildings/:id` | 获取单个建筑 | id |
+| POST | `/api/buildings` | 添加建筑 | FormData |
+| DELETE | `/api/buildings/:id` | 删除建筑 | id |
 
 ### AI功能接口
 
-- `POST /api/generate-description` - 生成建筑介绍（已集成DashScope）
-- `POST /api/text-to-speech` - 文字转语音（已集成DashScope TTS）
+| 方法 | 路径 | 说明 | 状态 |
+|------|------|------|------|
+| POST | `/api/generate-description` | 生成建筑介绍 | ✅ 已集成DashScope |
+| POST | `/api/text-to-speech` | 文字转语音 | ✅ 已集成NestJS TTS |
 
 ## 📱 界面说明
 
@@ -117,12 +123,12 @@ building-info-platform/
 
 ### AI建筑介绍生成
 - 使用DashScope API
-- 校长身份的温和语气
+- 院长身份的温和语气
 - 150-300字的导览文字
 - 基于知识库的准确信息
 
 ### 文字转语音
-- 使用DashScope TTS API
+- 使用NestJS TTS服务
 - 生成MP3格式音频文件
 - 自动保存到服务器
 
@@ -142,6 +148,7 @@ building-info-platform/
 
 ### 后端
 - Node.js + Express
+- NestJS（文字转语音服务）
 - SQLite数据库
 - Multer（文件上传）
 - DashScope API（AI功能）
@@ -151,33 +158,12 @@ building-info-platform/
 - Styled Components
 - 响应式设计
 
-## 📝 开发说明
+## ⚠️ 注意事项
 
-### 环境变量配置
-
-确保在 `backend/.env` 文件中配置：
-- `DASHSCOPE_API_KEY`：您的DashScope API密钥
-- `DASHSCOPE_APP_ID`：您的应用ID
-
-### 添加新建筑
-
-1. 通过管理后台界面添加
-2. 或直接修改 `backend/scripts/initDatabase.js` 添加示例数据
-
-### 图片上传限制
-
-- 文件大小：最大5MB
-- 文件格式：仅支持图片格式（jpg、png、gif等）
-- 存储位置：`backend/uploads/` 目录
-
-## 🚦 使用流程
-
-1. **启动项目**：运行 `npm run dev` 启动前后端服务器
-2. **访问应用**：浏览器打开 `http://localhost:3000`
-3. **用户界面**：选择建筑自动生成介绍，点击语音按钮播放
-4. **管理后台**：点击"管理后台"切换到管理界面
-5. **添加建筑**：填写建筑信息，上传图片，点击添加
-6. **管理建筑**：查看建筑列表，删除不需要的建筑
+1. **API密钥**：确保DashScope API密钥和应用ID配置正确
+2. **端口占用**：确保3000和5000端口未被占用
+3. **权限管理**：管理后台无身份验证，生产环境需要添加
+4. **文件存储**：图片和音频存储在本地，生产环境建议使用云存储
 
 ## 🔒 安全说明
 
@@ -205,6 +191,6 @@ building-info-platform/
 
 欢迎提交Issue和Pull Request来改进项目！
 
-## �� 许可证
+## 许可证
 
 MIT License 
