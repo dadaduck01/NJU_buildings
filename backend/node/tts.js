@@ -40,7 +40,7 @@ function textToSpeech(text, outputFilePath = 'output.mp3', options = {}) {
                     model: options.model || 'cosyvoice-v1',
                     parameters: {
                         text_type: 'PlainText',
-                        voice: options.voice || 'voice', // 音色
+                        voice: options.voice || 'cosyvoice-clone-v1-prefix-f7310bf44f02466ca27000c32e96b033', // 音色
                         format: options.format || 'mp3', // 音频格式
                         sample_rate: options.sampleRate || 22050, // 采样率
                         volume: options.volume || 50, // 音量
