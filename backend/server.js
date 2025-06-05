@@ -21,7 +21,8 @@ if (!fs.existsSync(audioDir)) {
 }
 
 // 数据库连接
-const db = new sqlite3.Database('./database/buildings.db', (err) => {
+const dbPath = path.join(__dirname, 'database', 'buildings.db');
+const db = new sqlite3.Database(dbPath, (err) => {
   if (err) {
     console.error('数据库连接失败:', err.message);
   } else {
@@ -147,6 +148,14 @@ app.post('/api/text-to-speech', async (req, res) => {
   }
 
   try {
+    // 检查API Key是否配置
+    if (!process.env.DASHSCOPE_API_KEY) {
+      return res.status(500).json({
+        success: false,
+        error: '语音功能需要配置API Key，请联系管理员'
+      });
+    }
+
     // 确保音频目录存在
     const audioDir = path.join(__dirname, 'uploads', 'audio');
     if (!fs.existsSync(audioDir)) {
@@ -161,6 +170,18 @@ app.post('/api/text-to-speech', async (req, res) => {
     const tts = require('./node/tts');
     await tts(text, outputPath);
 
+    // 复制音频文件到nginx静态目录
+    try {
+      const nginxAudioDir = '/var/www/uploads/audio';
+      if (!fs.existsSync(nginxAudioDir)) {
+        fs.mkdirSync(nginxAudioDir, { recursive: true });
+      }
+      const destPath = path.join(nginxAudioDir, fileName);
+      fs.copyFileSync(outputPath, destPath);
+    } catch (copyError) {
+      console.warn('复制音频文件到nginx目录失败:', copyError);
+    }
+
     // 返回音频文件URL
     res.json({
       success: true,
@@ -170,7 +191,7 @@ app.post('/api/text-to-speech', async (req, res) => {
     console.error('文本转语音失败:', error);
     res.status(500).json({
       success: false,
-      error: '文本转语音失败'
+      error: `文本转语音失败: ${error.message}`
     });
   }
 });

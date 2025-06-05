@@ -6,7 +6,8 @@ const fs = require('fs');
 const router = express.Router();
 
 // 数据库连接
-const db = new sqlite3.Database('./database/buildings.db');
+const dbPath = path.join(__dirname, '../database/buildings.db');
+const db = new sqlite3.Database(dbPath);
 
 // 确保uploads目录存在
 const uploadsDir = path.join(__dirname, '../uploads');
@@ -116,6 +117,19 @@ router.post('/', upload.single('image'), (req, res) => {
   let imageUrl = null;
   if (req.file) {
     imageUrl = '/uploads/' + req.file.filename;
+    
+    // 复制文件到nginx静态目录
+    try {
+      const nginxUploadsDir = '/var/www/uploads';
+      if (!fs.existsSync(nginxUploadsDir)) {
+        fs.mkdirSync(nginxUploadsDir, { recursive: true });
+      }
+      const sourcePath = req.file.path;
+      const destPath = path.join(nginxUploadsDir, req.file.filename);
+      fs.copyFileSync(sourcePath, destPath);
+    } catch (copyError) {
+      console.warn('复制文件到nginx目录失败:', copyError);
+    }
   }
 
   const sql = `INSERT INTO buildings (name, image_url, address) 
